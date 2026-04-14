@@ -1,0 +1,7 @@
+export * from './axios'
+{%- if query == "rtk" %}
+export * from './rtk_query'
+{%- endif %}
+{%- if query == "tanstack" %}
+export * from './tanstack_query'
+{%- endif %}

@@ -1,0 +1,15 @@
+import { createFileRoute } from '@tanstack/react-router'
+import ExampleModule from '@modules/example_module';
+
+export const Route = createFileRoute('/')({
+  component: HomePage,
+})
+
+function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to the Home Page</h1>
+      <ExampleModule title="Example Module" />
+    </div>
+  );
+};

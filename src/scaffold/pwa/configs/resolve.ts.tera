@@ -1,0 +1,5 @@
+export default {
+  tsconfigPaths: true,
+  extensions: ['.tsx', '.ts', '.js', '.jsx', '.mjs', '.json'],
+  dedupe: ['react', 'react-dom'],
+}

@@ -1,0 +1,192 @@
+# {{ project_name }}
+
+A webview application designed for embedding in native iOS/Android apps with React 19, TypeScript, and Tailwind CSS v4.
+
+## Features
+
+- **Vite 7** - Lightning fast development with HMR
+- **React 19** - Latest React with React Compiler
+- **TypeScript 5.8** - Full type safety with ES2024 target
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **ESLint 9** - Flat config with type-checked rules
+- **Native Bridge** - Communication with iOS WKWebView and Android WebView
+- **i18next** - Internationalization support
+{%- if query == "rtk" %}
+- **RTK Query** - Data fetching with Redux Toolkit
+{%- endif %}
+{%- if query == "tanstack" %}
+- **TanStack Query** - Powerful data fetching and caching
+{%- endif %}
+{%- if use_tanstack_router %}
+- **TanStack Router** - Type-safe file-based routing
+{%- endif %}
+{%- if use_uikit %}
+- **@mdigitalcn/uikit** - 50+ Radix-based components
+{%- endif %}
+
+## Webview Features
+
+- **iOS WKWebView Support** - Uses `window.webkit.messageHandlers`
+- **Android WebView Support** - Uses injected JavaScript interface
+- **Bidirectional Communication** - Send and receive messages from native
+- **Request/Response Pattern** - Promise-based native requests with timeout
+- **Type-safe Bridge** - Full TypeScript support for native communication
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v22.12.0+
+- pnpm v10.12.0+
+
+### Installation
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) to view your application.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm type-check` | Run TypeScript check |
+| `pnpm format` | Format with Prettier |
+| `pnpm analyze` | Analyze bundle size |
+
+## Native Bridge Usage
+
+### Sending Messages to Native
+
+```typescript
+import { sendToNative, isWebview } from './bridge'
+
+// Check if running in webview
+if (isWebview()) {
+  // Send a simple action
+  sendToNative('user:logout')
+
+  // Send with payload
+  sendToNative('cart:update', { itemId: '123', quantity: 2 })
+}
+```
+
+### Receiving Messages from Native
+
+```typescript
+import { onNativeMessage } from './bridge'
+
+// Subscribe to native messages
+const unsubscribe = onNativeMessage('user:updated', (data) => {
+  console.log('User updated:', data)
+})
+
+// Cleanup when done
+unsubscribe()
+```
+
+### Request/Response Pattern
+
+```typescript
+import { requestFromNative } from './bridge'
+
+// Request data with timeout
+const userData = await requestFromNative('user:get', { id: '123' }, 5000)
+```
+
+### iOS Integration (Swift)
+
+```swift
+import WebKit
+
+class ViewController: UIViewController, WKScriptMessageHandler {
+    var webView: WKWebView!
+
+    override func viewDidLoad() {
+        let config = WKWebViewConfiguration()
+        config.userContentController.add(self, name: "nativeBridge")
+        webView = WKWebView(frame: view.bounds, configuration: config)
+    }
+
+    func userContentController(_ userContentController: WKUserContentController,
+                               didReceive message: WKScriptMessage) {
+        guard let body = message.body as? String else { return }
+        // Handle message from webview
+    }
+
+    func sendToWebview(_ message: String) {
+        webView.evaluateJavaScript("window.onNativeMessage('\(message)')")
+    }
+}
+```
+
+### Android Integration (Kotlin)
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var webView: WebView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        webView = WebView(this)
+        webView.settings.javaScriptEnabled = true
+        webView.addJavascriptInterface(WebAppInterface(), "AndroidBridge")
+    }
+
+    inner class WebAppInterface {
+        @JavascriptInterface
+        fun postMessage(message: String) {
+            // Handle message from webview
+        }
+    }
+
+    fun sendToWebview(message: String) {
+        webView.evaluateJavascript("window.onNativeMessage('$message')", null)
+    }
+}
+```
+
+## Project Structure
+
+```
+src/
+├── App.tsx              # Root component with bridge init
+├── bridge.ts            # Native communication layer
+├── main.tsx             # Entry point
+├── globals.css          # Global styles
+├── i18n/                # Internationalization
+├── modules/             # Feature modules
+│   └── example_module/
+└── shared/
+    ├── hooks/           # Custom hooks
+    ├── services/        # API services
+    └── contexts/        # React contexts
+```
+
+## Deployment
+
+Build the application and host the `dist/` folder on your CDN or server:
+
+```bash
+pnpm build
+```
+
+Configure your native app to load the webview from your hosted URL.
+
+## Security Best Practices
+
+- Only enable JavaScript when necessary
+- Validate all messages from webview before processing
+- Use HTTPS for production deployments
+- Implement Content Security Policy
+- Whitelist allowed URLs in native app
+
+## License
+
+MIT

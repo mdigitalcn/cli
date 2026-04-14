@@ -1,0 +1,11 @@
+import { memo } from "react"
+
+const Content = () => {
+  return (
+    <div>
+      <p>This is an example content.</p>
+    </div>
+  );
+};
+
+export default memo(Content)

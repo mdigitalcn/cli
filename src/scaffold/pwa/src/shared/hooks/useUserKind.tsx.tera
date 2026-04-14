@@ -1,0 +1,12 @@
+import { useContext } from "react"
+import { UserKindContext } from "@shared/contexts/user_kind_context"
+
+export const useUserKind = () => {
+  const context = useContext(UserKindContext);
+
+  if (!context) {
+    throw new Error("useUserKind must be used within a StatusProvider");
+  }
+
+  return context;
+};

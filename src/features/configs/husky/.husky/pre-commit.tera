@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx lint-staged
+
+{% if project.has_typescript %}
+echo "Running type check..."
+pnpm run type-check || {
+  echo "TypeScript check failed."
+  exit 1
+}
+{% endif %}

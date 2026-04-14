@@ -1,0 +1,17 @@
+dist/
+build/
+coverage/
+node_modules/
+*.min.js
+*.min.css
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.next/
+.nuxt/
+.output/
+.vercel/
+.netlify/
+{% if project.has_vite %}.vite/{% endif %}
+public/
+static/

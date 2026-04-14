@@ -1,0 +1,15 @@
+import { memo } from "react"
+
+interface HeroProps {
+  title?: string;
+}
+
+const Hero = ({ title = "Hero" }: HeroProps) => {
+  return (
+    <div>
+      <h1>{title}</h1>
+    </div>
+  );
+};
+
+export default memo(Hero)

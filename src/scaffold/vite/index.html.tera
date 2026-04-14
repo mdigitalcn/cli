@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ project_name }}</title>
+    <meta name="description" content="Modern React application built with {{ template }} and TypeScript" />
+    <meta name="theme-color" content="#646cff" />
+
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="{{ project_name }}" />
+    <meta property="og:description" content="Modern React application built with Vite and TypeScript" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ project_name }}" />
+    <meta name="twitter:description" content="Modern React application built with Vite and TypeScript" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

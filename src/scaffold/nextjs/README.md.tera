@@ -1,0 +1,100 @@
+# {{ project_name }}
+
+A modern Next.js application built with React 19, TypeScript, and Tailwind CSS.
+
+## Features
+
+- **Next.js 16** - App Router with Turbopack (stable)
+- **React 19** - Latest React with React Compiler
+- **TypeScript 5.8** - Full type safety with ES2024 target
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **ESLint 9** - Flat config with type-checked rules
+- **i18next** - Internationalization support
+{%- if query == "rtk" %}
+- **RTK Query** - Data fetching with Redux Toolkit
+{%- endif %}
+{%- if query == "tanstack" %}
+- **TanStack Query** - Powerful data fetching and caching
+{%- endif %}
+{%- if use_uikit %}
+- **@mdigitalcn/uikit** - 50+ Radix-based components
+{%- endif %}
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v22.12.0+
+- pnpm v10.12.0+
+
+### Installation
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view your application.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server (Turbopack) |
+| `pnpm build` | Build for production (Turbopack) |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm type-check` | Run TypeScript check |
+| `pnpm format` | Format with Prettier |
+
+## Project Structure
+
+```
+src/
+├── app/                 # App Router pages
+│   ├── layout.tsx       # Root layout
+│   ├── page.tsx         # Home page
+│   └── api/             # API routes
+├── globals.css          # Global styles
+├── i18n/                # Internationalization
+├── modules/             # Feature modules
+│   └── example_module/
+└── shared/
+    ├── hooks/           # Custom hooks
+    ├── services/        # API services
+    └── contexts/        # React contexts
+```
+
+## Environment Variables
+
+Client-side variables must be prefixed with `NEXT_PUBLIC_`:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=https://api.example.com
+NEXT_PUBLIC_APP_NAME={{ project_name }}
+```
+
+Server-only variables are not exposed to the browser:
+
+```bash
+DATABASE_URL=your-database-url
+API_SECRET_KEY=your-secret-key
+```
+
+## Deployment
+
+### Vercel
+
+Push to GitHub and import to Vercel for automatic deployment.
+
+### Docker
+
+```bash
+docker build -t {{ project_name }} .
+docker run -p 3000:3000 {{ project_name }}
+```
+
+## License
+
+MIT

@@ -1,0 +1,163 @@
+{%- if query == "rtk" %}
+import { baseApi } from "@/services/rtk_query";
+import type { User, CreateUserData, UpdateUserData } from "./types";
+
+export const usersApi = baseApi.injectEndpoints({
+  endpoints: (build) => ({
+    getUsers: build.query<User[], void>({
+      query: () => ({
+        url: "/users",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+
+    getUser: build.query<User, number>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, id) => [{ type: "User", id }],
+    }),
+
+    createUser: build.mutation<User, CreateUserData>({
+      query: (userData) => ({
+        url: "/users",
+        method: "POST",
+        data: userData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    updateUser: build.mutation<User, UpdateUserData>({
+      query: ({ id, ...userData }) => ({
+        url: `/users/${id}`,
+        method: "PUT",
+        data: userData,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: "User", id }],
+    }),
+
+    deleteUser: build.mutation<void, number>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, id) => [{ type: "User", id }],
+    }),
+  }),
+});
+
+export const {
+  useGetUsersQuery,
+  useGetUserQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} = usersApi;
+{%- elif query == "tanstack" %}
+import { useQueryClient } from '@tanstack/react-query';
+import { useApiQuery, useApiMutation, apiGet, apiPost, apiPut, apiDelete, queryKeys, type QueryConfig, type MutationConfig } from "@/services/tanstack_query/api";
+import type { User, CreateUserData, UpdateUserData } from "./types";
+
+// TanStack Query hooks
+export const useGetUsersQuery = (options?: QueryConfig<User[]>) => {
+  return useApiQuery(
+    queryKeys.list({ resource: 'users' }),
+    () => apiGet<User[]>('/users'),
+    options
+  );
+};
+
+export const useGetUserQuery = (id: number, options?: QueryConfig<User>) => {
+  return useApiQuery(
+    queryKeys.detail(id),
+    () => apiGet<User>(`/users/${id}`),
+    {
+      enabled: !!id,
+      ...options,
+    }
+  );
+};
+
+export const useCreateUserMutation = (options?: MutationConfig<User, CreateUserData>) => {
+  const queryClient = useQueryClient();
+
+  return useApiMutation(
+    (userData: CreateUserData) => apiPost<User>('/users', userData),
+    {
+      onSuccess: (data, variables, onMutateResult, context) => {
+        // Invalidate users list
+        queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
+        options?.onSuccess?.(data, variables, onMutateResult, context);
+      },
+      ...options,
+    }
+  );
+};
+
+export const useUpdateUserMutation = (options?: MutationConfig<User, UpdateUserData>) => {
+  const queryClient = useQueryClient();
+
+  return useApiMutation(
+    ({ id, ...userData }: UpdateUserData) => apiPut<User>(`/users/${id}`, userData),
+    {
+      onSuccess: (data, variables, onMutateResult, context) => {
+        // Invalidate specific user and users list
+        queryClient.invalidateQueries({ queryKey: queryKeys.detail(variables.id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
+        options?.onSuccess?.(data, variables, onMutateResult, context);
+      },
+      ...options,
+    }
+  );
+};
+
+export const useDeleteUserMutation = (options?: MutationConfig<void, number>) => {
+  const queryClient = useQueryClient();
+
+  return useApiMutation(
+    (id: number) => apiDelete<void>(`/users/${id}`),
+    {
+      onSuccess: (data, variables, onMutateResult, context) => {
+        // Remove from cache and invalidate users list
+        queryClient.removeQueries({ queryKey: queryKeys.detail(variables) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
+        options?.onSuccess?.(data, variables, onMutateResult, context);
+      },
+      ...options,
+    }
+  );
+};
+{%- else %}
+// Example API functions without query library
+import type { User, CreateUserData, UpdateUserData } from "./types";
+
+// Placeholder functions when no query library is used
+export const getUsers = async (): Promise<User[]> => {
+  // Implementation with your preferred HTTP client
+  throw new Error("Not implemented");
+};
+
+export const getUser = async (_id: number): Promise<User> => {
+  // Implementation with your preferred HTTP client
+  throw new Error("Not implemented");
+};
+
+export const createUser = async (_userData: CreateUserData): Promise<User> => {
+  // Implementation with your preferred HTTP client
+  throw new Error("Not implemented");
+};
+
+export const updateUser = async (_userData: UpdateUserData): Promise<User> => {
+  // Implementation with your preferred HTTP client
+  throw new Error("Not implemented");
+};
+
+export const deleteUser = async (_id: number): Promise<void> => {
+  // Implementation with your preferred HTTP client
+  throw new Error("Not implemented");
+};
+{%- endif %}
+
+export type { User, CreateUserData, UpdateUserData };

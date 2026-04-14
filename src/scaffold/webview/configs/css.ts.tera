@@ -1,0 +1,10 @@
+export function buildCss(mode: string) {
+  return {
+    modules: {
+      generateScopedName:
+        mode === 'development'
+          ? '[path][name]__[local]'
+          : '[name]__[hash:base64:5]',
+    },
+  }
+}

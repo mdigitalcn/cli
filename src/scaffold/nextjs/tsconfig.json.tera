@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["DOM", "DOM.Iterable", "ES2024"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./src/shared/ui/*"],
+      "@/lib/*": ["./src/shared/lib/*"],
+      "@/utils/*": ["./src/shared/utils/*"],
+      "@/services/*": ["./src/shared/services/*"],
+      "@/hooks/*": ["./src/shared/hooks/*"],
+      "@/contexts/*": ["./src/shared/contexts/*"],
+      "@/modules/*": ["./src/modules/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

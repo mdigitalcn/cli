@@ -1,0 +1,20 @@
+{% if project.has_nextjs -%}
+import * as Sentry from "@sentry/nextjs";
+{%- else -%}
+import * as Sentry from "@sentry/react";
+{%- endif %}
+
+export function captureError(error: unknown, context?: Record<string, unknown>) {
+  if (context) {
+    Sentry.withScope((scope) => {
+      scope.setExtras(context);
+      Sentry.captureException(error);
+    });
+  } else {
+    Sentry.captureException(error);
+  }
+}
+
+export function setUser(user: { id: string; email?: string } | null) {
+  Sentry.setUser(user);
+}

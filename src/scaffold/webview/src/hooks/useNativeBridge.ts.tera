@@ -1,0 +1,99 @@
+import { useEffect, useCallback, useRef } from 'react'
+import {
+  initBridge,
+  destroyBridge,
+  onNativeMessage,
+  sendToNative,
+  requestFromNative,
+  isWebview,
+} from '../bridge'
+
+/**
+ * Initialize and manage the native bridge lifecycle
+ * Call this once at the app root level
+ */
+export function useBridge(): void {
+  const initialized = useRef(false)
+
+  useEffect(() => {
+    if (!initialized.current) {
+      initBridge()
+      initialized.current = true
+    }
+
+    return () => {
+      destroyBridge()
+      initialized.current = false
+    }
+  }, [])
+}
+
+/**
+ * Subscribe to native messages with automatic cleanup
+ *
+ * @param action - The action/event name to listen for
+ * @param callback - Function to call when message is received
+ *
+ * @example
+ * ```tsx
+ * useNativeMessage('user:updated', (data) => {
+ *   setUser(data)
+ * })
+ * ```
+ */
+export function useNativeMessage<T = unknown>(
+  action: string,
+  callback: (data: T) => void,
+): void {
+  const callbackRef = useRef(callback)
+  callbackRef.current = callback
+
+  useEffect(() => {
+    const unsubscribe = onNativeMessage(action, (data) => {
+      callbackRef.current(data as T)
+    })
+
+    return unsubscribe
+  }, [action])
+}
+
+/**
+ * Get a stable sendToNative function
+ *
+ * @example
+ * ```tsx
+ * const send = useSendToNative()
+ * send('cart:add', { productId: '123' })
+ * ```
+ */
+export function useSendToNative(): typeof sendToNative {
+  return useCallback(sendToNative, [])
+}
+
+/**
+ * Get a stable requestFromNative function
+ *
+ * @example
+ * ```tsx
+ * const request = useRequestFromNative()
+ * const user = await request('user:get', { id: '123' })
+ * ```
+ */
+export function useRequestFromNative(): typeof requestFromNative {
+  return useCallback(requestFromNative, [])
+}
+
+/**
+ * Check if running in webview context
+ *
+ * @example
+ * ```tsx
+ * const inWebview = useIsWebview()
+ * if (inWebview) {
+ *   // Show native-specific UI
+ * }
+ * ```
+ */
+export function useIsWebview(): boolean {
+  return isWebview()
+}

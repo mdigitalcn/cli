@@ -1,0 +1,17 @@
+import { memo } from "react"
+import Hero from "./components/hero"
+import Content from "./components/content"
+import { type ExampleModuleProps } from "./types";
+
+const ExamleModule = (props: ExampleModuleProps) => {
+
+  return (
+    <div>
+      <Hero title="Example hero" />
+      <h1>{props.title}</h1>
+      <Content />
+    </div>
+  );
+}
+
+export default memo(ExamleModule)

@@ -1,0 +1,123 @@
+{%- if query == "tanstack" %}
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@services/tanstack_query/client'
+{%- endif %}
+{%- if query == "rtk" %}
+import { Provider } from 'react-redux'
+import { store } from '@services/rtk_query/store'
+{%- endif %}
+{%- if use_tanstack_router %}
+import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+{%- endif %}
+{%- if use_uikit %}
+import { Button } from '@mdigitalcn/uikit'
+{%- endif %}
+import { useEffect } from 'react'
+import { initBridge, isWebview, sendToNative } from './bridge'
+
+import './App.css'
+
+{%- if use_tanstack_router %}
+
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'viewport',
+  defaultStaleTime: 5000,
+  scrollRestoration: true,
+  defaultPreloadDelay: 50,
+})
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+{%- endif %}
+
+const App = () => {
+  useEffect(() => {
+    initBridge()
+
+    if (isWebview()) {
+      sendToNative('app:ready', { version: '0.1.0' })
+    }
+  }, [])
+
+  return (
+{%- if query == "rtk" %}
+    <Provider store={store}>
+{%- endif %}
+{%- if query == "tanstack" %}
+    <QueryClientProvider client={queryClient}>
+{%- endif %}
+{%- if use_tanstack_router %}
+      <RouterProvider router={router} />
+{%- else %}
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-5xl font-bold mb-6 text-gray-900">{{ project_name }}</h1>
+            <p className="text-xl text-gray-600 mb-12">
+              A webview application for native iOS/Android apps.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <div className="rounded-lg bg-gray-100 p-6 shadow-lg">
+                <div className="flex flex-col items-center text-center">
+                  <span className="text-4xl mb-4">📱</span>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Native Bridge</h3>
+                  <p className="text-gray-600">
+                    Communicate with iOS WKWebView and Android WebView.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-gray-100 p-6 shadow-lg">
+                <div className="flex flex-col items-center text-center">
+                  <span className="text-4xl mb-4">🎨</span>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Modern Styling</h3>
+                  <p className="text-gray-600">
+                    Tailwind CSS v4 for utility-first styling.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-gray-100 p-6 shadow-lg">
+                <div className="flex flex-col items-center text-center">
+                  <span className="text-4xl mb-4">⚡</span>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Fast Development</h3>
+                  <p className="text-gray-600">
+                    Vite for lightning-fast HMR and builds.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-4">
+{%- if use_uikit %}
+              <Button variant="primary">Get Started</Button>
+              <Button variant="outline">Documentation</Button>
+{%- else %}
+              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Get Started
+              </button>
+              <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-900">
+                Documentation
+              </button>
+{%- endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+{%- endif %}
+{%- if query == "tanstack" %}
+    </QueryClientProvider>
+{%- endif %}
+{%- if query == "rtk" %}
+    </Provider>
+{%- endif %}
+  )
+}
+
+export default App

@@ -1,0 +1,9 @@
+const content = () => {
+  return (
+    <div>
+      <p>This is an example content.</p>
+    </div>
+  );
+};
+
+export default content;

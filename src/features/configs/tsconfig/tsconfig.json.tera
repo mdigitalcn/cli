@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+{%- if project.has_vite %}
+    "types": ["vite/client"],
+{%- endif %}
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["src"{% if project.has_vite %}, "vite-env.d.ts"{% endif %}],
+  "exclude": ["node_modules"]
+}

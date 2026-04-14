@@ -1,0 +1,43 @@
+image: node:22-slim
+
+stages:
+  - lint
+  - build
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@latest --activate
+  - pnpm config set store-dir .pnpm-store
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pnpm-store
+    - node_modules/
+
+lint:
+  stage: lint
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm run lint
+    - pnpm run type-check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+build:
+  stage: build
+  needs:
+    - lint
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"

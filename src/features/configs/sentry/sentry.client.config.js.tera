@@ -1,0 +1,17 @@
+{% if project.has_nextjs -%}
+import * as Sentry from "@sentry/nextjs";
+{%- else -%}
+import * as Sentry from "@sentry/react";
+{%- endif %}
+
+Sentry.init({
+  dsn: process.env.{% if project.has_nextjs %}NEXT_PUBLIC_{% endif %}SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+  integrations: [
+    Sentry.replayIntegration(),
+    Sentry.browserTracingIntegration(),
+  ],
+});

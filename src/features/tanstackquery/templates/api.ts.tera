@@ -1,0 +1,87 @@
+import { useQuery, useMutation, useQueryClient, type UseQueryOptions, type UseMutationOptions } from '@tanstack/react-query';
+import apiInstance from '../axios';
+import type { AxiosRequestConfig } from 'axios';
+
+// Types
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
+}
+
+export interface QueryConfig<TData = unknown, TError = ApiError> extends Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> {}
+
+export interface MutationConfig<TData = unknown, TVariables = unknown, TError = ApiError>
+  extends UseMutationOptions<TData, TError, TVariables> {}
+
+// Generic API functions
+export const apiGet = async <TData = unknown>(url: string, config?: AxiosRequestConfig): Promise<TData> => {
+  return apiInstance.get<TData>(url, config);
+};
+
+export const apiPost = async <TData = unknown, TPayload = unknown>(
+  url: string,
+  data?: TPayload,
+  config?: AxiosRequestConfig
+): Promise<TData> => {
+  return apiInstance.post<TData>(url, data, config);
+};
+
+export const apiPut = async <TData = unknown, TPayload = unknown>(
+  url: string,
+  data?: TPayload,
+  config?: AxiosRequestConfig
+): Promise<TData> => {
+  return apiInstance.put<TData>(url, data, config);
+};
+
+export const apiPatch = async <TData = unknown, TPayload = unknown>(
+  url: string,
+  data?: TPayload,
+  config?: AxiosRequestConfig
+): Promise<TData> => {
+  return apiInstance.patch<TData>(url, data, config);
+};
+
+export const apiDelete = async <TData = unknown>(url: string, config?: AxiosRequestConfig): Promise<TData> => {
+  return apiInstance.delete<TData>(url, config);
+};
+
+// Generic hooks
+export const useApiQuery = <TData = unknown, TError = ApiError>(
+  queryKey: unknown[],
+  queryFn: () => Promise<TData>,
+  options?: QueryConfig<TData, TError>
+) => {
+  return useQuery({
+    queryKey,
+    queryFn,
+    ...options,
+  });
+};
+
+export const useApiMutation = <TData = unknown, TVariables = unknown, TError = ApiError>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: MutationConfig<TData, TVariables, TError>
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn,
+    onSuccess: (data, variables, context) => {
+      // Invalidate and refetch queries by default
+      queryClient.invalidateQueries();
+      options?.onSuccess?.(data, variables, context);
+    },
+    ...options,
+  });
+};
+
+// Query key factories
+export const queryKeys = {
+  all: ['api'] as const,
+  lists: () => [...queryKeys.all, 'list'] as const,
+  list: (filters: Record<string, unknown>) => [...queryKeys.lists(), { filters }] as const,
+  details: () => [...queryKeys.all, 'detail'] as const,
+  detail: (id: string | number) => [...queryKeys.details(), id] as const,
+};

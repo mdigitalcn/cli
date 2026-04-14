@@ -1,0 +1,16 @@
+export function buildOptimizeDeps() {
+  return {
+    include: [
+      'react',
+      'react-dom',
+      {%- if query == "tanstack" %}
+      '@tanstack/react-query',
+      {%- endif %}
+      {%- if query == "rtk" %}
+      '@reduxjs/toolkit',
+      'react-redux',
+      {%- endif %}
+    ],
+    entries: ['src/main.tsx'],
+  }
+}

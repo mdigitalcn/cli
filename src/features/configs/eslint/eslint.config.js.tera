@@ -1,0 +1,34 @@
+import js from '@eslint/js'
+{%- if project.has_typescript %}
+import tseslint from 'typescript-eslint'
+{%- endif %}
+{%- if project.has_react %}
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+{%- endif %}
+
+export default [
+  { ignores: ['dist', 'build', 'coverage', 'node_modules', '.next'] },
+  js.configs.recommended,
+  {%- if project.has_typescript %}
+  ...tseslint.configs.recommended,
+  {%- endif %}
+  {
+    {%- if project.has_react %}
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    {%- endif %}
+    rules: {
+      {%- if project.has_react %}
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      {%- endif %}
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': 'warn',
+      'prefer-const': 'error',
+    },
+  },
+]

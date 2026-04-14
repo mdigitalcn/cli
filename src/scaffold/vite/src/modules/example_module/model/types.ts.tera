@@ -1,0 +1,15 @@
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface CreateUserData {
+  name: string;
+  email: string;
+}
+
+export interface UpdateUserData extends Partial<CreateUserData> {
+  id: number;
+}

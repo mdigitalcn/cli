@@ -1,0 +1,188 @@
+/**
+ * Native Bridge - Communication layer between webview and native iOS/Android apps
+ *
+ * iOS (WKWebView): Uses window.webkit.messageHandlers
+ * Android (WebView): Uses window.AndroidBridge injected interface
+ *
+ * @see https://developer.android.com/develop/ui/views/layout/webapps/webview
+ * @see https://developer.apple.com/documentation/webkit/wkusercontentcontroller
+ */
+
+type MessagePayload = Record<string, unknown>
+
+interface NativeBridge {
+  postMessage: (message: string) => void
+}
+
+interface WebkitMessageHandler {
+  postMessage: (message: unknown) => void
+}
+
+declare global {
+  interface Window {
+    webkit?: {
+      messageHandlers?: {
+        nativeBridge?: WebkitMessageHandler
+        [key: string]: WebkitMessageHandler | undefined
+      }
+    }
+    AndroidBridge?: NativeBridge
+    onNativeMessage?: (message: string) => void
+  }
+}
+
+type NativeMessageCallback = (data: unknown) => void
+
+const messageListeners = new Map<string, Set<NativeMessageCallback>>()
+
+/**
+ * Check if running inside a native webview
+ */
+export function isWebview(): boolean {
+  return isIOSWebview() || isAndroidWebview()
+}
+
+/**
+ * Check if running inside iOS WKWebView
+ */
+export function isIOSWebview(): boolean {
+  return typeof window.webkit?.messageHandlers?.nativeBridge !== 'undefined'
+}
+
+/**
+ * Check if running inside Android WebView
+ */
+export function isAndroidWebview(): boolean {
+  return typeof window.AndroidBridge !== 'undefined'
+}
+
+/**
+ * Send a message to the native app
+ *
+ * @param action - The action/event name
+ * @param payload - Optional data to send
+ *
+ * @example
+ * ```ts
+ * // Simple action
+ * sendToNative('user:logout')
+ *
+ * // With payload
+ * sendToNative('cart:update', { itemId: '123', quantity: 2 })
+ * ```
+ */
+export function sendToNative(action: string, payload?: MessagePayload): void {
+  const message = JSON.stringify({ action, payload, timestamp: Date.now() })
+
+  if (isIOSWebview()) {
+    window.webkit?.messageHandlers?.nativeBridge?.postMessage(message)
+  } else if (isAndroidWebview()) {
+    window.AndroidBridge?.postMessage(message)
+  } else {
+    console.debug('[Bridge] No native bridge available:', action, payload)
+  }
+}
+
+/**
+ * Subscribe to messages from the native app
+ *
+ * @param action - The action/event name to listen for
+ * @param callback - Function to call when message is received
+ * @returns Unsubscribe function
+ *
+ * @example
+ * ```ts
+ * const unsubscribe = onNativeMessage('user:updated', (data) => {
+ *   console.log('User updated:', data)
+ * })
+ *
+ * // Later, to stop listening:
+ * unsubscribe()
+ * ```
+ */
+export function onNativeMessage(action: string, callback: NativeMessageCallback): () => void {
+  if (!messageListeners.has(action)) {
+    messageListeners.set(action, new Set())
+  }
+
+  messageListeners.get(action)?.add(callback)
+
+  return () => {
+    messageListeners.get(action)?.delete(callback)
+  }
+}
+
+/**
+ * Initialize the bridge - call this once on app startup
+ * Sets up the global handler for receiving messages from native
+ */
+export function initBridge(): void {
+  window.onNativeMessage = (messageString: string) => {
+    try {
+      const { action, payload } = JSON.parse(messageString) as {
+        action: string
+        payload?: unknown
+      }
+
+      const listeners = messageListeners.get(action)
+      if (listeners) {
+        listeners.forEach((callback) => callback(payload))
+      }
+    } catch (error) {
+      console.error('[Bridge] Failed to parse native message:', error)
+    }
+  }
+}
+
+/**
+ * Destroy the bridge - call on app unmount to prevent memory leaks
+ */
+export function destroyBridge(): void {
+  messageListeners.clear()
+  window.onNativeMessage = undefined
+}
+
+/**
+ * Request data from native app with response handling
+ *
+ * @param action - The action/request name
+ * @param payload - Optional data to send
+ * @param timeout - Timeout in ms (default: 5000)
+ * @returns Promise that resolves with native response
+ *
+ * @example
+ * ```ts
+ * const userData = await requestFromNative('user:get', { id: '123' })
+ * ```
+ */
+export function requestFromNative<T = unknown>(
+  action: string,
+  payload?: MessagePayload,
+  timeout = 5000,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const requestId = `${action}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const responseAction = `${action}:response`
+
+    const timeoutId = setTimeout(() => {
+      unsubscribe()
+      reject(new Error(`Native request timeout: ${action}`))
+    }, timeout)
+
+    const unsubscribe = onNativeMessage(responseAction, (data) => {
+      const response = data as { requestId: string; data: T; error?: string }
+      if (response.requestId === requestId) {
+        clearTimeout(timeoutId)
+        unsubscribe()
+
+        if (response.error) {
+          reject(new Error(response.error))
+        } else {
+          resolve(response.data)
+        }
+      }
+    })
+
+    sendToNative(action, { ...payload, requestId })
+  })
+}

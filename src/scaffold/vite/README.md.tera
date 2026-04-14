@@ -1,0 +1,85 @@
+# {{ project_name }}
+
+A modern React application built with Vite, TypeScript, and Tailwind CSS.
+
+## Features
+
+- **Vite 7** - Lightning fast development with HMR
+- **React 19** - Latest React with React Compiler
+- **TypeScript 5.8** - Full type safety with ES2024 target
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **ESLint 9** - Flat config with type-checked rules
+- **i18next** - Internationalization support
+{%- if query == "rtk" %}
+- **RTK Query** - Data fetching with Redux Toolkit
+{%- endif %}
+{%- if query == "tanstack" %}
+- **TanStack Query** - Powerful data fetching and caching
+{%- endif %}
+{%- if use_tanstack_router %}
+- **TanStack Router** - Type-safe file-based routing
+{%- endif %}
+{%- if use_uikit %}
+- **@mdigitalcn/uikit** - 50+ Radix-based components
+{%- endif %}
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v22.12.0+
+- pnpm v10.12.0+
+
+### Installation
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view your application.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm type-check` | Run TypeScript check |
+| `pnpm format` | Format with Prettier |
+| `pnpm analyze` | Analyze bundle size |
+
+## Project Structure
+
+```
+src/
+├── App.tsx              # Root component
+├── main.tsx             # Entry point
+├── globals.css          # Global styles
+├── i18n/                # Internationalization
+├── modules/             # Feature modules
+│   └── example_module/
+└── shared/
+    ├── hooks/           # Custom hooks
+    ├── services/        # API services
+    ├── contexts/        # React contexts
+    └── utils/           # Utility functions
+```
+
+## Environment Variables
+
+All client-side variables must be prefixed with `VITE_`:
+
+```bash
+VITE_API_BASE_URL=https://api.example.com
+VITE_APP_TITLE={{ project_name }}
+```
+
+See `.env.example` for all available variables.
+
+## License
+
+MIT

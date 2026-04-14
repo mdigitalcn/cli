@@ -1,0 +1,49 @@
+import type { BuildOptions } from 'vite'
+
+export function buildOptions(mode: string): BuildOptions {
+  const isProd = mode === 'production'
+
+  return {
+    assetsDir: 'assets',
+    cssCodeSplit: true,
+    sourcemap: mode === 'development' ? 'inline' : false,
+    modulePreload: { polyfill: false },
+    minify: isProd,
+    cssMinify: isProd ? 'lightningcss' : false,
+    reportCompressedSize: false,
+    target: 'es2024',
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        entryFileNames: isProd ? 'js/[name]-[hash].js' : 'js/[name].js',
+        chunkFileNames: isProd ? 'js/[name]-[hash].js' : 'js/[name].js',
+        assetFileNames: (assetInfo) => {
+          const ext = assetInfo.name?.split('.').pop() || ''
+          if (/png|jpe?g|svg|gif|webp|avif/i.test(ext)) {
+            return isProd ? 'images/[name]-[hash][extname]' : 'images/[name][extname]'
+          }
+          if (/woff2?|eot|ttf|otf/i.test(ext)) {
+            return isProd ? 'fonts/[name]-[hash][extname]' : 'fonts/[name][extname]'
+          }
+          if (ext === 'css') {
+            return isProd ? 'css/[name]-[hash][extname]' : 'css/[name][extname]'
+          }
+          return isProd ? 'assets/[name]-[hash][extname]' : 'assets/[name][extname]'
+        },
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) return undefined
+          if (/react|react-dom/.test(id)) return 'vendor'
+          {%- if query == "tanstack" %}
+          if (id.includes('@tanstack/react-query')) return 'query'
+          {%- endif %}
+          {%- if query == "rtk" %}
+          if (/@reduxjs|react-redux/.test(id)) return 'redux'
+          {%- endif %}
+          return undefined
+        },
+      },
+      treeshake: isProd,
+    },
+  }
+}

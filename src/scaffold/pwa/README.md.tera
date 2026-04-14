@@ -1,0 +1,126 @@
+# {{ project_name }}
+
+A Progressive Web App built with Vite, React, TypeScript, and Workbox.
+
+## Features
+
+- **Vite 7** - Lightning fast development with HMR
+- **React 19** - Latest React with React Compiler
+- **TypeScript 5.8** - Full type safety with ES2024 target
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **ESLint 9** - Flat config with type-checked rules
+- **i18next** - Internationalization support
+- **Workbox** - Service worker with smart caching strategies
+{%- if query == "rtk" %}
+- **RTK Query** - Data fetching with Redux Toolkit
+{%- endif %}
+{%- if query == "tanstack" %}
+- **TanStack Query** - Powerful data fetching and caching
+{%- endif %}
+{%- if use_tanstack_router %}
+- **TanStack Router** - Type-safe file-based routing
+{%- endif %}
+{%- if use_uikit %}
+- **@mdigitalcn/uikit** - 50+ Radix-based components
+{%- endif %}
+
+## PWA Features
+
+- **Installable** - Add to home screen on mobile and desktop
+- **Offline Ready** - Works without network connection
+- **Auto Updates** - Seamless updates with service worker
+- **Smart Caching** - Cache-First for assets, Stale-While-Revalidate for API
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v22.12.0+
+- pnpm v10.12.0+
+
+### Installation
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view your application.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server with PWA |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm type-check` | Run TypeScript check |
+| `pnpm format` | Format with Prettier |
+| `pnpm analyze` | Analyze bundle size |
+
+## Project Structure
+
+```
+src/
+├── App.tsx              # Root component with PWA registration
+├── main.tsx             # Entry point
+├── globals.css          # Global styles
+├── i18n/                # Internationalization
+├── modules/             # Feature modules
+│   └── example_module/
+└── shared/
+    ├── hooks/           # Custom hooks
+    ├── services/        # API services
+    └── contexts/        # React contexts
+public/
+├── icons/               # PWA icons (192x192, 512x512)
+├── apple-touch-icon.png
+└── favicon.ico
+```
+
+## PWA Configuration
+
+The PWA is configured in `configs/plugins.ts` with:
+
+- **Auto-update** - New versions install automatically
+- **Precaching** - Static assets cached on install
+- **Runtime caching strategies**:
+  - Cache-First for images, fonts, static assets
+  - Stale-While-Revalidate for API calls
+  - Cache-First with 1-year expiry for Google Fonts
+
+### Icon Requirements
+
+Place your PWA icons in `public/icons/`:
+- `icon-192x192.png` - Standard icon
+- `icon-512x512.png` - Large icon
+- `icon-maskable-512x512.png` - Maskable icon (with safe zone)
+
+### Testing PWA
+
+1. Build: `pnpm build`
+2. Preview: `pnpm preview`
+3. Open Chrome DevTools > Application > Service Workers
+4. Check "Offline" to test offline functionality
+
+## Deployment
+
+### Vercel
+
+```bash
+pnpm build
+# Deploy dist/ folder
+```
+
+### Docker
+
+```bash
+docker build -t {{ project_name }} .
+docker run -p 3000:3000 {{ project_name }}
+```
+
+## License
+
+MIT

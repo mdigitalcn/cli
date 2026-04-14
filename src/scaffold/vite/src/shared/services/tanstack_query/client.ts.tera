@@ -1,0 +1,32 @@
+import { QueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
+      retry: (failureCount, error) => {
+        const axiosError = error as AxiosError;
+        // Don't retry on 4xx errors except 408, 429
+        if (axiosError?.response?.status && axiosError.response.status >= 400 && axiosError.response.status < 500) {
+          if (axiosError.response.status === 408 || axiosError.response.status === 429) {
+            return failureCount < 2;
+          }
+          return false;
+        }
+        // Retry up to 3 times for other errors
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: 'always',
+    },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000,
+    },
+  },
+});
+
+export default queryClient;

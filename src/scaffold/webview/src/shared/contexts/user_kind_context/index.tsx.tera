@@ -1,0 +1,20 @@
+import { createContext, useMemo, useState } from "react";
+import type { Dispatch, SetStateAction, ReactNode } from "react";
+
+export interface UserKindType {
+  status: "admin" | "user" | null;
+  setStatus: Dispatch<SetStateAction<"admin" | "user" | null>>;
+}
+
+export const UserKindContext = createContext<UserKindType | null>(null);
+
+export const StatusProvider = ({ children }: { children: ReactNode }) => {
+  const [status, setStatus] = useState<"admin" | "user" | null>(null);
+
+  const value = useMemo(
+    () => ({ status, setStatus }),
+    [status],
+  );
+
+  return <UserKindContext.Provider value={value}>{children}</UserKindContext.Provider>;
+};

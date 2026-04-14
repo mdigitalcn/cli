@@ -110,7 +110,7 @@ fn run_with_template(args: &Args, template_name: &str) -> Result<()> {
 
     // Determine project name
     let project_name = args.name.clone().unwrap_or_else(|| {
-        template_name.split('/').last().unwrap_or("my-app").to_string()
+        template_name.split('/').next_back().unwrap_or("my-app").to_string()
     });
 
     validate_non_interactive(&project_name, args.force)?;

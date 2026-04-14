@@ -123,10 +123,10 @@ fn generate_inner(choices: &UserChoices, quiet: bool) -> Result<()> {
     println!("  {:<14} {}", "Template:".dimmed(), template_label);
     println!("  {:<14} {}", "Query:".dimmed(), query_label);
     if choices.tanstack_router {
-        println!("  {:<14} {}", "Router:".dimmed(), "TanStack Router");
+        println!("  {:<14} TanStack Router", "Router:".dimmed());
     }
     if choices.uikit {
-        println!("  {:<14} {}", "UIKit:".dimmed(), "mdigitalcn Kit (82 components)");
+        println!("  {:<14} mdigitalcn Kit (82 components)", "UIKit:".dimmed());
     }
     println!("  {:<14} {}", "CI/CD:".dimmed(), cicd_label);
     println!("  {:<14} {}", "Files:".dimmed(), total_files);

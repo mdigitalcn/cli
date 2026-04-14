@@ -12,8 +12,18 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
   build:
     name: Build ${{ matrix.target }}
+    needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -57,30 +67,33 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          NAME="mdigitalcn-v${VERSION}-${{ matrix.target }}"
-          cp target/${{ matrix.target }}/release/mdigitalcn "${NAME}"
+          TARGET="${{ matrix.target }}"
+          NAME="mdigitalcn-v${VERSION}-${TARGET}"
+          cp target/${TARGET}/release/mdigitalcn "${NAME}"
           tar czf "${NAME}.tar.gz" "${NAME}"
-          shasum -a 256 "${NAME}.tar.gz" > sha256sums.txt
+          shasum -a 256 "${NAME}.tar.gz" > "sha256sums-${TARGET}.txt"
           echo "ASSET=${NAME}.tar.gz" >> $GITHUB_ENV
+          echo "SUMS=sha256sums-${TARGET}.txt" >> $GITHUB_ENV
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $VERSION = $env:GITHUB_REF_NAME -replace '^v', ''
-          $NAME = "mdigitalcn-v${VERSION}-${{ matrix.target }}"
-          Copy-Item "target/${{ matrix.target }}/release/mdigitalcn.exe" "${NAME}.exe"
+          $TARGET = "${{ matrix.target }}"
+          $NAME = "mdigitalcn-v${VERSION}-${TARGET}"
+          Copy-Item "target/${TARGET}/release/mdigitalcn.exe" "${NAME}.exe"
           Compress-Archive -Path "${NAME}.exe" -DestinationPath "${NAME}.zip"
           $hash = (Get-FileHash "${NAME}.zip" -Algorithm SHA256).Hash.ToLower()
-          "$hash  ${NAME}.zip" | Out-File -Append sha256sums.txt
+          "$hash  ${NAME}.zip" | Out-File "sha256sums-${TARGET}.txt"
           echo "ASSET=${NAME}.zip" | Out-File -Append $env:GITHUB_ENV
+          echo "SUMS=sha256sums-${TARGET}.txt" | Out-File -Append $env:GITHUB_ENV
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ env.ASSET }}
-            sha256sums.txt
-          generate_release_notes: true
+            ${{ env.SUMS }}
 
   universal-macos:
     name: macOS Universal
@@ -107,14 +120,14 @@ jobs:
             target/aarch64-apple-darwin/release/mdigitalcn \
             target/x86_64-apple-darwin/release/mdigitalcn
           tar czf "${NAME}.tar.gz" "${NAME}"
-          shasum -a 256 "${NAME}.tar.gz" > sha256sums.txt
+          shasum -a 256 "${NAME}.tar.gz" > "sha256sums-universal-apple-darwin.txt"
           echo "ASSET=${NAME}.tar.gz" >> $GITHUB_ENV
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ env.ASSET }}
-            sha256sums.txt
+            sha256sums-universal-apple-darwin.txt
 
   publish-crates:
     name: Publish to crates.io

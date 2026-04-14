@@ -15,17 +15,22 @@ A Rust CLI for scaffolding React/TypeScript projects and adding UI components, w
 
 ## Installation
 
+### npm (recommended)
+```bash
+npm install -g @mdigitalcn/cli
+```
+
+### Cargo
+```bash
+cargo install mdigitalcn-cli
+```
+
 ### Build from Source
 ```bash
 git clone https://github.com/mdigitalcn/cli
-cd mdigitalcn_cli
+cd cli
 cargo build --release
 # Binary: target/release/mdigitalcn
-```
-
-### Cargo Install
-```bash
-cargo install mdigitalcn-cli
 ```
 
 ## Quick Start
@@ -170,10 +175,9 @@ $ mdigitalcn component add table
 # Plus foundation files: utils.ts, types.ts, variants.ts
 ```
 
-External npm dependencies are listed for manual installation:
-```
-> Install peer dependencies:
-  - npm install react-hook-form @hookform/resolvers zod
+External npm dependencies are written to your `package.json` automatically. After adding, run:
+```bash
+npm install   # or pnpm install / yarn
 ```
 
 ## Commands Reference

@@ -1,6 +1,6 @@
 [package]
 name = "mdigitalcn-cli"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2024"
 description = "mdigitalcn CLI - Scaffold projects and add @mdigitalcn/uikit components from GitHub"
 authors = ["mdigitalcn Team"]

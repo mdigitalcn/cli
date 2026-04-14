@@ -34,14 +34,12 @@ pub fn add(project_root: &str, name: &str) -> Result<()> {
     out!(success, "Added {}", name);
 
     let meta = config_metadata();
-    if let Some((_, deps)) = meta.get(name) {
-        if !deps.is_empty() {
-            let pm = crate::utils::detect_package_manager(project_root);
-            let install_flag = if pm.contains("pnpm") || pm.contains("bun") { " -D" } else { " --save-dev" };
-            out!(blank);
-            out!(info, "Install dependencies:");
-            out!(step, "{}{} {}", pm, install_flag, deps.join(" "));
-        }
+    if let Some((_, deps)) = meta.get(name).filter(|(_, d)| !d.is_empty()) {
+        let pm = crate::utils::detect_package_manager(project_root);
+        let install_flag = if pm.contains("pnpm") || pm.contains("bun") { " -D" } else { " --save-dev" };
+        out!(blank);
+        out!(info, "Install dependencies:");
+        out!(step, "{}{} {}", pm, install_flag, deps.join(" "));
     }
 
     Ok(())
@@ -139,35 +137,36 @@ fn create_context(project_path: &Path) -> Result<Context> {
     let mut context = Context::new();
 
     let pkg_path = project_path.join("package.json");
-    if let Ok(content) = fs::read_to_string(&pkg_path) {
-        if let Ok(pkg) = serde_json::from_str::<serde_json::Value>(&content) {
-            if let Some(name) = pkg.get("name").and_then(|n| n.as_str()) {
-                context.insert("project_name", name);
-            }
-
-            let has_dep = |name: &str| {
-                ["dependencies", "devDependencies"]
-                    .iter()
-                    .any(|k| pkg.get(k).and_then(|d| d.get(name)).is_some())
-            };
-
-            let has_react = has_dep("react");
-            let has_typescript = has_dep("typescript");
-            let has_nextjs = has_dep("next");
-            let has_vite = has_dep("vite");
-
-            context.insert("has_react", &has_react);
-            context.insert("has_typescript", &has_typescript);
-            context.insert("has_nextjs", &has_nextjs);
-            context.insert("has_vite", &has_vite);
-
-            let mut project = HashMap::new();
-            project.insert("has_react", has_react);
-            project.insert("has_typescript", has_typescript);
-            project.insert("has_nextjs", has_nextjs);
-            project.insert("has_vite", has_vite);
-            context.insert("project", &project);
+    if let Some(pkg) = fs::read_to_string(&pkg_path)
+        .ok()
+        .and_then(|c| serde_json::from_str::<serde_json::Value>(&c).ok())
+    {
+        if let Some(name) = pkg.get("name").and_then(|n| n.as_str()) {
+            context.insert("project_name", name);
         }
+
+        let has_dep = |name: &str| {
+            ["dependencies", "devDependencies"]
+                .iter()
+                .any(|k| pkg.get(k).and_then(|d| d.get(name)).is_some())
+        };
+
+        let has_react = has_dep("react");
+        let has_typescript = has_dep("typescript");
+        let has_nextjs = has_dep("next");
+        let has_vite = has_dep("vite");
+
+        context.insert("has_react", &has_react);
+        context.insert("has_typescript", &has_typescript);
+        context.insert("has_nextjs", &has_nextjs);
+        context.insert("has_vite", &has_vite);
+
+        let mut project = HashMap::new();
+        project.insert("has_react", has_react);
+        project.insert("has_typescript", has_typescript);
+        project.insert("has_nextjs", has_nextjs);
+        project.insert("has_vite", has_vite);
+        context.insert("project", &project);
     }
 
     if let Ok(config) = crate::config::read_project_config(project_path.to_str().unwrap_or(".")) {

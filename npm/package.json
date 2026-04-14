@@ -1,0 +1,25 @@
+{
+  "name": "@mdigitalcn/cli",
+  "version": "0.3.0",
+  "description": "mdigitalcn CLI - Scaffold projects and add @mdigitalcn/uikit components",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdigitalcn/cli"
+  },
+  "keywords": ["cli", "scaffold", "react", "mdigitalcn", "uikit"],
+  "bin": {
+    "mdigitalcn": "./run.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "install.js",
+    "run.js",
+    "bin/"
+  ]
+}

@@ -1,4 +1,5 @@
 /target
 /dist
+/npm/bin/
 .DS_Store
 .claude

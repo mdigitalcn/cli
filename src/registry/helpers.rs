@@ -298,8 +298,8 @@ pub fn run_list(
 
     let mut categories: HashMap<&str, Vec<&&super::RegistryItem>> = HashMap::new();
     for item in &items {
-        if let Some(cat) = category {
-            if item.category != cat { continue; }
+        if category.is_some_and(|cat| item.category != cat) {
+            continue;
         }
         categories.entry(item.category.as_str()).or_default().push(item);
     }

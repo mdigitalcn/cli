@@ -191,12 +191,11 @@ fn load_templates_from_dir(tera: &mut Tera, dir: &Dir) -> Result<()> {
     for entry in dir.entries() {
         match entry {
             DirEntry::File(file) => {
-                if let Some(path_str) = file.path().to_str() {
-                    if path_str.ends_with(".tera") {
-                        if let Some(content) = file.contents_utf8() {
-                            tera.add_raw_template(path_str, content)?;
-                        }
-                    }
+                if let Some((path_str, content)) = file.path().to_str()
+                    .filter(|p| p.ends_with(".tera"))
+                    .zip(file.contents_utf8())
+                {
+                    tera.add_raw_template(path_str, content)?;
                 }
             }
             DirEntry::Dir(subdir) => {

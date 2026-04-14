@@ -34,16 +34,17 @@ pub fn create(project_root: &str) -> Result<()> {
     let mut tera = tera::Tera::default();
 
     for file in TEMPLATES.files() {
-        if let (Some(path), Some(content)) = (file.path().to_str(), file.contents_utf8()) {
-            if path.ends_with(".tera") {
-                let name = file
-                    .path()
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or(path);
-                tera.add_raw_template(name, content)
-                    .with_context(|| format!("Failed to parse template '{}'", name))?;
-            }
+        if let Some((path, content)) = file.path().to_str()
+            .filter(|p| p.ends_with(".tera"))
+            .zip(file.contents_utf8())
+        {
+            let name = file
+                .path()
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or(path);
+            tera.add_raw_template(name, content)
+                .with_context(|| format!("Failed to parse template '{}'", name))?;
         }
     }
 

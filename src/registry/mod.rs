@@ -50,11 +50,9 @@ pub fn group_by_namespace(names: &[String]) -> (Vec<String>, HashMap<String, Vec
     let mut defaults = Vec::new();
     let mut namespaced: HashMap<String, Vec<String>> = HashMap::new();
     for name in names {
-        if let Some(rest) = name.strip_prefix('@') {
-            if let Some((ns, item)) = rest.split_once('/') {
-                namespaced.entry(format!("@{}", ns)).or_default().push(item.to_string());
-                continue;
-            }
+        if let Some((ns, item)) = name.strip_prefix('@').and_then(|rest| rest.split_once('/')) {
+            namespaced.entry(format!("@{}", ns)).or_default().push(item.to_string());
+            continue;
         }
         defaults.push(name.clone());
     }

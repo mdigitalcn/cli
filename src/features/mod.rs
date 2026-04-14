@@ -3,22 +3,12 @@ pub mod tanstackquery;
 use anyhow::{Context as AnyhowContext, Result};
 use dialoguer::{theme::ColorfulTheme, MultiSelect};
 use include_dir::{Dir, DirEntry, include_dir};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use tera::{Context, Tera};
 
 static CONFIGS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/features/configs");
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct ConfigManifest {
-    description: String,
-    #[serde(default)]
-    npm_deps: Vec<String>,
-    #[serde(default)]
-    dev_deps: Vec<String>,
-}
 
 fn config_metadata() -> HashMap<&'static str, (&'static str, &'static [&'static str])> {
     let mut m = HashMap::new();
@@ -129,11 +119,12 @@ fn load_templates_recursive(tera: &mut Tera, dir: &Dir) -> Result<()> {
     for entry in dir.entries() {
         match entry {
             DirEntry::File(file) => {
-                if let (Some(path), Some(content)) = (file.path().to_str(), file.contents_utf8()) {
-                    if path.ends_with(".tera") {
-                        tera.add_raw_template(path, content)
-                            .with_context(|| format!("Failed to parse template '{}'", path))?;
-                    }
+                if let Some((path, content)) = file.path().to_str()
+                    .filter(|p| p.ends_with(".tera"))
+                    .zip(file.contents_utf8())
+                {
+                    tera.add_raw_template(path, content)
+                        .with_context(|| format!("Failed to parse template '{}'", path))?;
                 }
             }
             DirEntry::Dir(subdir) => {

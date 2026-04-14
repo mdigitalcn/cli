@@ -151,9 +151,8 @@ fn resolve_and_add(
 
     let mut registry_map = HashMap::new();
     for kind in &search_kinds {
-        match fetch_registry(&client, &cache, *kind, no_cache) {
-            Ok(reg) => { registry_map.insert(*kind, reg); }
-            Err(_) => {} // skip unreachable registries
+        if let Ok(reg) = fetch_registry(&client, &cache, *kind, no_cache) {
+            registry_map.insert(*kind, reg);
         }
     }
     sp.finish_and_clear();
